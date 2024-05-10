@@ -15,22 +15,26 @@ package elastic
 
 import (
 	"context"
+	"github.com/olivere/elastic/v7"
 
 	pkglogger "github.com/quanxiang-cloud/cabin/logger"
-
-	"github.com/olivere/elastic/v7"
 )
 
 // Config config
 type Config struct {
-	Host []string
-	Log  bool
+	Host     []string
+	Username string
+	Password string
+	Log      bool
 }
 
 // NewClient new elasticsearch client
 func NewClient(conf *Config, log pkglogger.AdaptedLogger, opts ...elastic.ClientOptionFunc) (*elastic.Client, error) {
 	for _, host := range conf.Host {
 		opts = append(opts, elastic.SetURL(host))
+	}
+	if conf.Username != "" && conf.Password != "" {
+		opts = append(opts, elastic.SetBasicAuth(conf.Username, conf.Password))
 	}
 	opts = append(opts, elastic.SetErrorLog(newLogger(log)))
 	if conf.Log {
